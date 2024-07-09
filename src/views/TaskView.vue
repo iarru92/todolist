@@ -1,3 +1,27 @@
+<template>
+  <div class="container">
+    <h1>Tasks</h1>
+    <div class="task-input-container">
+      <input placeholder="Task Title" v-model="taskTitle" class="styled-input" />
+      <input placeholder="Task Description" v-model="taskDescription" class="styled-input" />
+      <button @click="addNewTask" class="styled-button">{{ editingTaskId ? 'Update Task' : 'Add Task' }}</button>
+    </div>
+
+    <br><br>
+    <button @click="taskStore.fetchTasks()" class="styled-button">Fetch Tasks</button>
+    <ul class="task-list">
+      <li v-for="task in taskStore.tasks" :key="task.id" class="task-item">
+        <span :class="{ 'task-done': task.done }" class="task-post-it">
+          <strong :style="{ 'text-decoration': task.done ? 'line-through' : 'none', 'color': task.done ? 'green' : 'black' }">{{ task.title }}</strong>: {{ task.description }}
+        </span>
+        <button v-if="!task.done" @click="markTaskAsDone(task)" class="done-button">Done</button>
+        <button @click="editTask(task)" class="edit-button">Edit</button>
+        <button @click="deleteTask(task.id)" class="delete-button">Delete</button>
+      </li>
+    </ul>
+  </div>
+</template>
+
 <script setup>
 import { useTaskStore } from "../stores/task";
 import { useUserStore } from "../stores/user";
@@ -30,30 +54,13 @@ const editTask = (task) => {
 const deleteTask = async (id) => {
   await taskStore.deleteTask(id);
 };
+
+const markTaskAsDone = async (task) => {
+  task.done = true; // Marcamos la tarea como completada en el estado
+};
 </script>
 
-<template>
-  <div class="container">
-    <h1>Tasks</h1>
-    <div class="task-input-container">
-      <input placeholder="Task Title" v-model="taskTitle" class="styled-input" />
-      <input placeholder="Task Description" v-model="taskDescription" class="styled-input" />
-      <button @click="addNewTask" class="styled-button">{{ editingTaskId ? 'Update Task' : 'Add Task' }}</button>
-    </div>
-
-    <br><br>
-    <button @click="taskStore.fetchTasks()" class="styled-button">Fetch Tasks</button>
-    <ul class="task-list">
-      <li v-for="task in taskStore.tasks" :key="task.id" class="task-item">
-        <strong>{{ task.title }}</strong>: {{ task.description }}
-        <button @click="editTask(task)" class="edit-button">Edit</button>
-        <button @click="deleteTask(task.id)" class="delete-button">Delete</button>
-      </li>
-    </ul>
-  </div>
-</template>
-
-<style>
+<style scoped>
 .container {
   display: flex;
   flex-direction: column;
@@ -61,7 +68,7 @@ const deleteTask = async (id) => {
   justify-content: center;
   min-height: 100vh;
   background: linear-gradient(135deg, #f9a8d4, #8ec5fc);
-  color: #fff;
+  color: #333;
   font-family: 'Arial', sans-serif;
 }
 
@@ -83,7 +90,7 @@ h1 {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.styled-button, .edit-button, .delete-button {
+.styled-button, .edit-button, .delete-button, .done-button {
   background: #ff6b6b;
   color: #fff;
   padding: 10px 20px;
@@ -95,7 +102,7 @@ h1 {
   margin: 5px;
 }
 
-.styled-button:hover, .edit-button:hover, .delete-button:hover {
+.styled-button:hover, .edit-button:hover, .delete-button:hover, .done-button:hover {
   background: #ff4757;
 }
 
@@ -105,7 +112,7 @@ h1 {
 }
 
 .task-item {
-  background: rgba(255, 255, 255, 0.2);
+  background: #fffde7; /* Fondo amarillo claro para simular un post-it */
   padding: 10px 20px;
   margin: 5px 0;
   border-radius: 15px;
@@ -113,6 +120,17 @@ h1 {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.task-post-it {
+  font-family: 'Permanent Marker', cursive; /* Fuente que simula el texto de rotulador */
+  font-size: 18px;
+  color: black; /* Color inicial del texto */
+}
+
+.task-done strong {
+  color: green; /* Color del texto cuando está completado */
+  text-decoration: line-through; /* Tachado del texto cuando está completado */
 }
 
 .edit-button, .delete-button {
